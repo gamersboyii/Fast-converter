@@ -1,0 +1,65 @@
+{
+  "name": "fastconvert",
+  "version": "1.2.0",
+  "description": "Fast Windows media converter powered by FFmpeg",
+  "main": "src/main.js",
+  "author": "FastConvert",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging",
+    "dist": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.fastconvert.app",
+    "productName": "FastConvert",
+    "artifactName": "FastConvert-${version}-${arch}.${ext}",
+    "asar": true,
+    "compression": "maximum",
+    "electronLanguages": ["en-US"],
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "differentialPackage": false
+    },
+    "portable": {
+      "artifactName": "FastConvert-${version}-portable.${ext}"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

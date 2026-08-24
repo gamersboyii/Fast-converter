@@ -1,0 +1,12 @@
+node_modules/
+dist/
+bin/*.exe
+*.zip
+
+# editor / agent tooling
+.codex/
+.cursor/
+.grok/
+.impeccable/
+.mimocode/
+.claude/

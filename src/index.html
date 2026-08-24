@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FastConvert</title>
+<link rel="preload" href="fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/GeistMono-Variable.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="fx" aria-hidden="true">
+  <div class="fx-glow fx-glow-a"></div>
+  <div class="fx-glow fx-glow-b"></div>
+  <div class="fx-noise"></div>
+</div>
+
+<nav class="nav">
+  <div class="nav-pill rise" style="--rd:0">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13"/><path d="m14 4 3 3-3 3"/><path d="M20 17H7"/><path d="m10 20-3-3 3-3"/></svg>
+      </span>
+      <span class="brand-name">FastConvert</span>
+    </div>
+    <div class="engine" id="engineChip"><span class="dot"></span><span id="engineStatus">Checking engine</span></div>
+  </div>
+</nav>
+
+<main class="shell">
+  <section class="hero">
+    <h1 class="display rise" style="--rd:1">
+      Convert
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      anything.<br />
+      <span class="grad">Instantly.</span>
+    </h1>
+    <p class="hero-sub rise" style="--rd:2">
+      Local FFmpeg-powered conversion for video and audio. Remux compatible
+      streams in seconds, re-encode with your GPU, and batch entire folders.
+      Nothing ever leaves this machine.
+    </p>
+    <div class="cta-row rise" style="--rd:3">
+      <button id="addBtn" class="btn btn-primary">Browse files</button>
+      <button id="folderBtn" class="btn btn-ghost">Choose output folder</button>
+    </div>
+    <div class="kbd-hint rise" style="--rd:4"><kbd>Ctrl</kbd>+<kbd>O</kbd> to open files anywhere</div>
+
+    <section id="queue" class="queue hidden">
+      <div class="queue-head">
+        <h2>Queue</h2>
+        <span class="count" id="countLabel">0 files</span>
+        <span class="spacer"></span>
+        <button id="clearBtn" class="btn btn-ghost btn-sm">Clear</button>
+      </div>
+      <div id="fileList"></div>
+    </section>
+
+    <section id="dropZone" class="dropzone rise" style="--rd:5">
+      <span class="corner c-tl"></span><span class="corner c-tr"></span>
+      <span class="corner c-bl"></span><span class="corner c-br"></span>
+      <div class="dz-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+      </div>
+      <h2>Drop files here</h2>
+      <p>Video and audio, any size. Streams straight from disk.</p>
+      <span class="dz-formats">MP4 · MKV · MOV · WEBM · MP3 · FLAC · WAV</span>
+    </section>
+  </section>
+
+  <div class="marquee reveal" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-group">
+        <span>MP4</span><span>H.265</span><span>AV1</span><span>MKV</span><span>MOV</span><span>WEBM</span><span>AVI</span><span>FLV</span><span>MPEG-TS</span><span>WMV</span><span>PRORES</span><span>GIF</span><span>MP3</span><span>AAC</span><span>M4A</span><span>WAV</span><span>FLAC</span><span>OGG</span><span>OPUS</span>
+      </div>
+      <div class="marquee-group">
+        <span>MP4</span><span>H.265</span><span>AV1</span><span>MKV</span><span>MOV</span><span>WEBM</span><span>AVI</span><span>FLV</span><span>MPEG-TS</span><span>WMV</span><span>PRORES</span><span>GIF</span><span>MP3</span><span>AAC</span><span>M4A</span><span>WAV</span><span>FLAC</span><span>OGG</span><span>OPUS</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="bento reveal">
+    <div class="card span-12">
+      <div class="card-label"><span>Output format</span><span class="card-value" id="formatPreview">MP4</span></div>
+      <div class="chips" id="formatRail"></div>
+    </div>
+    <div class="card span-4">
+      <div class="card-label"><span>Encoding mode</span></div>
+      <div class="opts">
+        <button class="opt active" data-mode="copy">
+          <span class="opt-head"><span class="opt-name">Fast copy / remux</span><span class="opt-check"></span></span>
+          <span class="opt-desc">Stream-copy tracks into the new container. Near-instant when codecs match.</span>
+        </button>
+        <button class="opt" data-mode="encode">
+          <span class="opt-head"><span class="opt-name">Re-encode</span><span class="opt-check"></span></span>
+          <span class="opt-desc">Full transcode with hardware acceleration when available.</span>
+        </button>
+      </div>
+    </div>
+    <div class="card span-4">
+      <div class="card-label"><span>Encoder</span></div>
+      <div class="chips chips-grid" id="encoderRail"></div>
+    </div>
+    <div class="card span-4">
+      <div class="card-label"><span>Quality</span></div>
+      <div class="chips" id="qualityRail"></div>
+      <p class="card-note" id="qualityNote">Balanced speed and compression.</p>
+    </div>
+    <div class="card span-12 dest">
+      <div class="card-label"><span>Destination</span></div>
+      <div class="dest-row">
+        <input id="outputFolder" readonly placeholder="Same folder as source" spellcheck="false" />
+        <button id="destBrowse" class="btn btn-ghost btn-sm">Browse</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="historyWrap" class="history-wrap hidden">
+    <h3>Recent activity</h3>
+    <div id="history"></div>
+  </section>
+
+  <footer class="footer">
+    <span>FastConvert · local FFmpeg conversion</span>
+    <span id="machine" class="mono"></span>
+  </footer>
+</main>
+
+<div class="dock" role="region" aria-label="Conversion control">
+  <svg class="ring" viewBox="0 0 40 40" aria-hidden="true">
+    <defs>
+      <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7c8cff"/>
+        <stop offset="100%" stop-color="#22d3ee"/>
+      </linearGradient>
+    </defs>
+    <circle class="ring-track" cx="20" cy="20" r="15.5"/>
+    <circle class="ring-fill" id="ringFill" cx="20" cy="20" r="15.5"/>
+  </svg>
+  <div class="dock-text">
+    <b id="overall">Ready</b>
+    <span id="overallSub">Add a file to start.</span>
+  </div>
+  <button id="startBtn" class="btn btn-primary btn-big" disabled>Convert</button>
+</div>
+
+<div class="made-by">Made by Jeet · free for everyone, forever, no limits</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
